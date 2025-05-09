@@ -2,6 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const passport = require('passport');
+const YAML = require('yamljs');
+const swaggerUi = require('swagger-ui-express');
+const path = require('path');
 require('./controllers/auth');
 
 const app = express();
@@ -28,6 +31,13 @@ const loginRoutes = require('./routes/login');
 
 console.log('loginRoutes loaded:', loginRoutes); // Debug login routes
 
+// Load Swagger YAML from the DB folder
+const swaggerDocument = YAML.load(path.join(__dirname, './db/swagger.yaml'));
+
+// Mount Swagger UI at /api-docs
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });
@@ -48,8 +58,9 @@ app.use('/login', loginRoutes);
 
 console.log('All routes registered'); // Debug route registration
 
-// Start server
-const port = 3000;
-app.listen(port, () => {
-    console.log(`App listening on port ${port}`);
+// Start server and Swagger
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Swagger UI available at http://localhost:${PORT}/api-docs`);
 });
